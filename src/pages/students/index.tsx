@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import StudentForm from '../../components/StudentForm';
+import StudentProfileDrawer from '../../components/StudentProfileDrawer';
+import { useAuth } from '../../context/AuthContext';
 
 export default function StudentsPage(){
   const [students, setStudents] = useState<any[]>([]);
   const [showCreate, setShowCreate] = useState(false);
+  const [selected, setSelected] = useState<any | null>(null);
+  const auth = useAuth();
 
   async function load(){
     const res = await fetch('/api/students');
@@ -18,7 +22,9 @@ export default function StudentsPage(){
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Students</h1>
         <div>
-          <button onClick={()=>setShowCreate(true)} className="px-4 py-2 bg-[var(--primary-500)] text-white rounded-lg">Create Student</button>
+          {(auth.user?.role === 'Admin' || auth.user?.role === 'HOD') && (
+            <button onClick={()=>setShowCreate(true)} className="px-4 py-2 bg-[var(--primary-500)] text-white rounded-lg">Create Student</button>
+          )}
         </div>
       </div>
 
@@ -40,20 +46,28 @@ export default function StudentsPage(){
               <th className="text-left text-sm text-[var(--text-secondary)] py-2 px-3">Roll</th>
               <th className="text-left text-sm text-[var(--text-secondary)] py-2 px-3">Dept</th>
               <th className="text-left text-sm text-[var(--text-secondary)] py-2 px-3">Year</th>
+              <th className="text-left text-sm text-[var(--text-secondary)] py-2 px-3">Actions</th>
             </tr>
           </thead>
           <tbody>
             {students.map(s=> (
               <tr key={s.id} className="hover:bg-[var(--muted)]">
-                <td className="py-3 px-3">{s.name}</td>
+                <td className="py-3 px-3 cursor-pointer" onClick={()=>setSelected(s)}>{s.name}</td>
                 <td className="py-3 px-3">{s.roll}</td>
                 <td className="py-3 px-3">{s.department}</td>
                 <td className="py-3 px-3">{s.year}</td>
+                <td className="py-3 px-3">
+                  {(auth.user?.role === 'Admin' || auth.user?.role === 'HOD' || auth.user?.role === 'Teacher') && (
+                    <button onClick={()=>setSelected(s)} className="text-primary-500">Edit</button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {selected && <StudentProfileDrawer student={selected} onSaved={()=>{ setSelected(null); load(); }} onClose={()=>setSelected(null)} />}
     </div>
   );
 }

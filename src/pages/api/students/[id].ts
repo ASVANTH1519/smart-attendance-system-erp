@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { students } from '../../../lib/mockData';
+import { requireRole } from '../../_utils/auth';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse){
   const { id } = req.query;
@@ -11,8 +12,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse){
     return res.status(200).json({ data: students[idx] });
   }
   if(req.method === 'PUT'){
-    const { name, roll, department, year } = req.body || {};
-    const item = { ...students[idx], name, roll, department, year };
+    const auth = requireRole(req, res, ['Admin','HOD','Teacher']);
+    if(!auth) return;
+    const { name, roll, department, year, avatar } = req.body || {};
+    const item = { ...students[idx], name, roll, department, year, avatar: avatar || students[idx].avatar };
     students[idx] = item;
     return res.status(200).json({ data: item });
   }

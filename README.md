@@ -1,1 +1,1 @@
-I added mock auth, RBAC-ready AuthContext, student create/edit APIs, SSE stream and the Students module UI with a create form. Next steps: protect more routes, add profile drawer, and complete RBAC UI flows.
+Updated: Hardened RBAC on API routes, student profile drawer/edit/upload, attendance daily/period views with CSV export, tag assignment and device logs pages.
